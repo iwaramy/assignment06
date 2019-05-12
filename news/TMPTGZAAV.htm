@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="description" content="Illustrations - CSS3 Transitions and jQuery Lightbox" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Illustrations - CSS3 Transitions and jQuery Lightbox</title>
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link
+rel="stylesheet" title="Disabled for Preview-in-Browser: css/lightbox.css" />
+<style type="text/css">
+
+/* Preload images */
+body:after {
+  content: url(images/close.png) url(images/loading.gif) url(images/prev.png) url(images/next.png);
+  display: none;
+}
+
+body.lb-disable-scrolling {
+  overflow: hidden;
+}
+
+.lightboxOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  background-color: black;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  opacity: 0.8;
+  display: none;
+}
+
+.lightbox {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: 10000;
+  text-align: center;
+  line-height: 0;
+  font-weight: normal;
+}
+
+.lightbox .lb-image {
+  display: block;
+  height: auto;
+  max-width: inherit;
+  max-height: none;
+  border-radius: 3px;
+
+  /* Image border */
+  border: 4px solid white;
+}
+
+.lightbox a img {
+  border: none;
+}
+
+.lb-outerContainer {
+  position: relative;
+  *zoom: 1;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  border-radius: 4px;
+
+  /* Background color behind image.
+     This is visible during transitions. */
+  background-color: white;
+}
+
+.lb-outerContainer:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.lb-loader {
+  position: absolute;
+  top: 43%;
+  left: 0;
+  height: 25%;
+  width: 100%;
+  text-align: center;
+  line-height: 0;
+}
+
+.lb-cancel {
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  background: url(images/loading.gif) no-repeat;
+}
+
+.lb-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 10;
+}
+
+.lb-container > .nav {
+  left: 0;
+}
+
+.lb-nav a {
+  outline: none;
+  background-image: url('data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');
+}
+
+.lb-prev, .lb-next {
+  height: 100%;
+  cursor: pointer;
+  display: block;
+}
+
+.lb-nav a.lb-prev {
+  width: 34%;
+  left: 0;
+  float: left;
+  background: url(images/prev.png) left 48% no-repeat;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  -webkit-transition: opacity 0.6s;
+  -moz-transition: opacity 0.6s;
+  -o-transition: opacity 0.6s;
+  transition: opacity 0.6s;
+}
+
+.lb-nav a.lb-prev:hover {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+}
+
+.lb-nav a.lb-next {
+  width: 64%;
+  right: 0;
+  float: right;
+  background: url(images/next.png) right 48% no-repeat;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  -webkit-transition: opacity 0.6s;
+  -moz-transition: opacity 0.6s;
+  -o-transition: opacity 0.6s;
+  transition: opacity 0.6s;
+}
+
+.lb-nav a.lb-next:hover {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+}
+
+.lb-dataContainer {
+  margin: 0 auto;
+  padding-top: 5px;
+  *zoom: 1;
+  width: 100%;
+  -moz-border-radius-bottomleft: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.lb-dataContainer:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.lb-data {
+  padding: 0 4px;
+  color: #ccc;
+}
+
+.lb-data .lb-details {
+  width: 85%;
+  float: left;
+  text-align: left;
+  line-height: 1.1em;
+}
+
+.lb-data .lb-caption {
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1em;
+}
+
+.lb-data .lb-caption a {
+  color: #4ae;
+}
+
+.lb-data .lb-number {
+  display: block;
+  clear: left;
+  padding-bottom: 1em;
+  font-size: 12px;
+  color: #999999;
+}
+
+.lb-data .lb-close {
+  display: block;
+  float: right;
+  width: 30px;
+  height: 30px;
+  background: url(images/close.png) top right no-repeat;
+  text-align: right;
+  outline: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
+  opacity: 0.7;
+  -webkit-transition: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
+  -o-transition: opacity 0.2s;
+  transition: opacity 0.2s;
+}
+
+.lb-data .lb-close:hover {
+  cursor: pointer;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+}
+
+
+</style>
+
+<link rel="stylesheet" title="Disabled for Preview-in-Browser: simplePageStyles7.css" type="text/css">
+<style type="text/css">
+
+/*https://www.w3schools.com/howto/howto_js_topnav.asp*/
+ 
+body {
+	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, sans-serif;
+	margin: 0px;
+	padding: 0px;
+	background-color: #f3f3f3;
+}
+#container {
+	width: 100%;
+	margin: 0 auto;
+	padding: 0px;
+	background-color: #f3f3f3;
+	max-width: 60em;
+}
+header {
+	/*background-color: rgba(180,183,128,1.00);*/
+	margin: 0;
+	padding: 0;
+	background-image: url(images/owl.jpg);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+h1 {
+	/*background-color: #8D5943;*/
+	font-size: 1.75em;
+	color: #F3F3F3;
+	padding: 10px 30px 3em 30px;
+	margin: 0px;
+	line-height: 1.1em;
+}
+#main {
+	/*overflow: hidden;*/
+	max-width: 60em;
+	margin: 0 auto; 
+	padding: 0;
+}
+		
+h2 {
+	font-size: 1.4em;
+	margin: 0px;
+	padding: 24px 30px 0;
+}
+img   {
+	margin: 20px auto 0 auto;
+	padding: 0;
+	border: solid #C96B52 1px;
+	display: block;
+}
+p {
+	font-size: 1em;
+	line-height: 1.7em;
+	margin: 0px;
+	padding: 0px 30px;
+}
+h3 {
+	font-size: 1.2em;
+	margin: 0px;
+	padding: 0.75em 0px .2em 30px;
+}
+ul {
+	list-style: none;
+	margin: 0px;
+	padding: .2em 0px 0px 30px;
+	padding-left: 0;
+}
+li {
+	line-height: 1.5em;
+}
+a {
+	font-size: 1em;
+	font-weight: bold;
+	color: #965A40;
+	text-decoration: underline;
+}
+a:visited {
+	color: #EA6A47;
+}
+a:hover, a:focus, a:active {
+	color: #D9252E;
+	text-decoration: none;
+	background-color: transparent;
+}
+footer p {
+	background-color: #8D5943;
+	color: #F3F3F3;
+	margin: 30px 0 0 0;
+	padding: 5px 0 5px 30px;
+}
+header img {
+	border: 0;
+	margin-top: 0;
+	width: 20%;
+}
+.header-banner {
+	margin: 0 auto;
+	padding: 0;
+	max-width: 100%;
+	overflow: hidden;
+}
+article {
+	margin: 0;
+	padding: 20px 0 0 0;
+	position: relative;
+}
+.flex-holder {
+	padding-top: 1.5em;
+  /* We first create a flex layout context */
+  display: flex;  
+  /* Then we define the flow direction and if we allow the items to wrap 
+   * Remember this is the same as:
+   * flex-direction: row;
+   * flex-wrap: wrap;
+   */
+  flex-flow: row wrap;  
+  /* Then we define how is distributed the remaining space */
+  justify-content: center;
+}
+.flex-holder li {
+	width: 300px;
+	/*height: 230px;*/
+	height: auto;
+	margin: 0 0 30px 20px;	
+	padding: 0;
+	}
+
+.flex-holder li a, .flex-holder li a:visited {
+	display: block;
+}
+.flex-holder p {
+	padding: .5em 0 0 0;
+	text-align: center;
+}
+.flex-holder img {
+	margin: 0 auto;
+	border-color: #ccc;
+	background-color: #fff;
+	-webkit-transition: border-color 500ms ease-in-out;
+	-moz-transition: border-color 500ms ease-in-out;
+	-ms-transition: border-color 500ms ease-in-out;
+	-o-transition: border-color 500ms ease-in-out;
+	transition: border-color 300ms ease-in-out;
+}
+.flex-holder img:hover {
+	border-color:#C96B52;
+}
+#skiptocontent a {
+    padding: 6px;
+    position: absolute;
+    top: -40px;
+    left: 0px;
+    color: white;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+    border-bottom-right-radius: 8px;
+    background: transparent;
+    -webkit-transition: top 1s ease-out, background 1s linear;
+    transition: top 1s ease-out, background 1s linear;
+    z-index: 100;
+}
+#skiptocontent a:focus {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background: #BF1722;
+    outline: 0;
+    -webkit-transition: top .1s ease-in, background .5s linear;
+    transition: top .1s ease-in, background .5s linear;
+}
+
+ul.topnav {
+	text-align: center;
+	display: none;
+}
+ul.topnav li a, ul.topnav li a:visited, .banner-icon a, .banner-icon a:visited  {
+	padding: .5em 1em;
+	color: #333;
+	text-decoration: none;
+	line-height: 1em;
+	font-weight: 400;
+	transition: 0.3s;
+}
+ul.topnav li a:hover, ul.topnav li a:focus, ul.topnav li a:active, .banner-icon a:focus, .banner-icon a:hover, .banner-icon a:active {
+	color:#d7743f;
+}
+
+.banner-icon {
+position: absolute;
+    top: 0em;
+    right: 1em;
+	margin: 0;
+	padding: 0;
+	z-index: 5;
+}
+.banner-icon a {
+	display: block;
+	padding: .5em 1em;
+}
+
+/*
+@media screen and (max-width:768px){*/
+
+ul.topnav.responsive {
+	position: relative;
+	display:block;
+	top: 0;
+}
+	
+  ul.topnav.responsive li {
+    float: none;
+    /*display: block;*/
+  }
+  ul.topnav.responsive li a {
+    display: inline-block;
+    text-align: center;
+	width: 7em;
+	border-bottom: dotted #333 1px;
+  }
+
+	ul.topnav li>ul li a {
+	color: #888;
+		padding: .5em;
+		width: 5em;
+		font-size: .9em;
+	}
+.vertical-image {	
+	width: 80%;
+}
+
+ 
+@media screen and (min-width:768px){
+h1 {
+	width: 66%;
+	float: left;
+	margin: .5em 0 0 0;
+	padding-bottom: 9em;
+}
+header {
+	overflow: hidden;
+}
+header img {
+	width: 22.375%;
+	float: right;
+	margin: 1.5em 0 0 0;
+	padding: 0 1.75em 0 0;
+}
+.header-banner {
+	max-width: 60em;
+}
+img {
+	float: left;
+	margin: 30px 20px 10px 30px;
+}
+	
+article {
+	padding-top: 0;
+}
+#main {		
+background-color: #DFDDDD;
+padding: 0 30px;
+}
+	
+.banner-icon {
+		display: none;
+	}
+
+ul.topnav {
+	float: right;
+	margin: 0 15px;
+	display: block;
+	padding: .25em;
+}
+ul.topnav li {
+	display: inline-block;
+	position: relative;
+}
+ul.topnav li>ul {
+	position: absolute;
+	top: 28px;
+	left: 0;
+	padding-top: 0;
+	width: 7em;
+	text-align: left;
+	background-color: rgba(90,139,210,1);
+	background-color:#868686;
+	z-index:1;
+    visibility:hidden;
+    opacity:0;
+    filter:alpha(opacity=0);
+    -webkit-transition:200ms ease;
+    -moz-transition:200ms ease;
+    -o-transition:200ms ease;
+    transition:200ms ease;
+}
+ul.topnav > li:hover ul {
+    visibility:visible;
+    opacity:1;
+    filter:alpha(opacity=100);
+}
+	
+
+ul.topnav li>ul li {
+	line-height:1.9em;
+	width: 100%;
+	}
+ul.topnav li>ul li a {
+	color: #fff;
+	display: block;	
+	padding-right: 1.75em;
+	padding-left: 1em;
+	}
+ul.topnav li>ul a:hover, ul.topnav li>ul a:focus, ul.topnav li>ul a:active {
+	background-color: #26426D;
+	}
+.group:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+}
+
+
+
+
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="header-banner">
+<div id="skiptocontent">
+	<a href="#main">Skip to Content</a>
+	</div>
+<img src="images/logo.png" alt="VCT170 logo"/>
+  <h1>Illustration </h1>
+</div>
+  </header>
+  <div id="container">
+<article>
+<div class="banner-icon">
+<a href="javascript:void(0);" style="font-size: 15px;" onClick="myFunction()">MENU &#9776</a>
+</div>
+<nav id="main" class="group">
+  <ul class="topnav" id="myTopnav">
+    <li> <a href="index.html">Home</a></li>
+    <li> <a href="about.html">About</a></li>
+    <li> <a href="works.html">Works</a>
+    	<ul>
+			<li><a href="posters.html">Posters</a></li>
+			<li><a href="magazine.html">Magazines</a></li>
+			<li><a href="illustration.html">Illustrations</a></li>
+		</ul>	
+    </li>
+    <li> <a href="#contact.html">Contact</a></li>
+  </ul>
+</nav>
+<h2>Illustration</h2>
+
+<ul class="flex-holder">
+  <li><a href="images/mister.png"
+data-lightbox="series1"
+data-title="Vector portrait of
+a neighbor’s golden retriever,
+Mister."><img src="../../../../tutorial-8/images/mister.svg" alt="Dog image"/></a></li>
+  <li><a href="images/cardinal.svg"><img src="images/cardinal.svg" alt="Parrot image"/></a></li>
+  <li><a href="images/boyd.svg"><img src="images/boyd.svg" alt="Man image"/></a></li>
+</ul>
+</article>
+<footer>
+<p>&copy; 2016 Claire Fant</p></footer>
+</div><!--end container-->
+<script>
+function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+        x.className += " responsive";
+    } else {
+        x.className = "topnav";
+    }
+}
+</script>
+<script src="js/lightbox-plus-jquery.
+js"></script>
+<script>
+lightbox.option({
+'resizeDuration': 200,
+'wrapAround': true
+})
+</script>
+</body>
+</html>
